@@ -1,0 +1,44 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Environment variables / secrets
+.env
+.env.*
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+docker-compose.override.yml
+volumes/
+*.tar
+*.img
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE/editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Backup files
+*~
