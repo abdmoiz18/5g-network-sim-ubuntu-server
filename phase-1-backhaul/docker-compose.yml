@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  priority-ue:
+    image: alpine:latest
+    container_name: priority-ue
+    command: ping -D 8.8.8.8
+    networks:
+      telecom-net:
+        ipv4_address: 172.20.0.10
+
+  bulk-ue:
+    image: alpine:latest
+    container_name: bulk-ue
+    command: sh -c "apk add curl && while true; do curl -s http://speedtest.ftp.otenet.gr/files/test10Mb.db > /dev/null; done"
+    networks:
+      telecom-net:
+        ipv4_address: 172.20.0.20
+
+networks:
+  telecom-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
