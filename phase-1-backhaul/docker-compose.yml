@@ -4,7 +4,7 @@ services:
   priority-ue:
     image: alpine:latest
     container_name: priority-ue
-    command: ping -D 8.8.8.8
+    command: ping 8.8.8.8
     networks:
       telecom-net:
         ipv4_address: 172.20.0.10
