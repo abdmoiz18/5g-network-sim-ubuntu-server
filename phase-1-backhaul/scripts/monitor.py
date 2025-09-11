@@ -12,6 +12,13 @@ PING_TARGET = "8.8.8.8"
 LATENCY_THRESHOLD_MS = 150 # ms
 CHECK_INTERVAL = 10 # seconds
 
+# Simple impairment steps to simulate worsening congestion
+IMPAIRMENT_STEPS = [
+    {"delay":"20ms","loss":"0.5%"}, # Light congestion
+    {"delay":"50ms","loss":"1%"}, # Moderate congestion
+    {"delay":"100ms","loss":"2%"}, # Heavy congestion
+]
+
 def run_command(cmd):
     """Execute a shell command and return its output."""
     try:
@@ -31,6 +38,14 @@ def measure_latency():
         logger.warning(f"Could not parse ping output: {output}")
         return None
 
+def apply_impairment(step):
+    """Apply network impairment to simulate congestion"""
+    delay = step["delay"]
+    loss = step["loss"]
+    logger.info(f"Applying impairment: delay={delay}, loss={loss}")
+    run_command("sudo tc qdisc del dev enp0s3 root 2>/dev/null")
+    run_command(f"sudo tc qdisc add dev enp0s3 root netem delay {delay} loss {loss}")
+
 def enable_qos():
     """Apply QoS rules to prioritize ICMP (ping) traffic over other traffic."""
     logger.info("Enabling QoS remediation...")
@@ -45,26 +60,35 @@ def enable_qos():
     run_command("sudo tc qdisc add dev enp0s3 parent 1:3 handle 40: netem delay 100ms loss 2% rate 1mbit")
     logger.info("QoS rules applied. ICMP traffic is now prioritized.")
 
+# Major replacements here comapred to previous commit
 def main():
-    logger.info("Starting network monitor...")
+    logger.info("Starting 5G backhaul monitor...")
     logger.info(f"Configuration: Threshold={LATENCY_THRESHOLD_MS}ms, Check-Interval={CHECK_INTERVAL}s")
 
     try:
-        while True:
-            latency=measure_latency()
+        # Apply progressive impairments to simulate worsening congestion
+        # This is to simulate congestion in a 5G backhaul with better accuracy, as a proof-of-concept, NOT real world simulation
+        for i, step in enumerate(IMPAIRMENT_STEPS):
+            logger.info(f"Simulating congestion level {i+1}/{len(IMPAIRMENT_STEPS)}")
+            apply_impairment(step)
+            time.sleep(CHECK_INTERVAL) # Let impairment settle
+
+            latency = measure_latency()
             if latency is None:
-             logger.error("Failed to measure latency. Check network connectivity.")
+                logger.error("Failed to measure latency. Check network connectivity.")
+                continue
             elif latency > LATENCY_THRESHOLD_MS:
-             logger.warning(f"Congestion detected! Latency: {latency}ms > {LATENCY_THRESHOLD_MS}ms threshold")
-             enable_qos()
-             logger.info("Remediation complete. Monitor will now exit. Run reset_network.sh to return to normal.")
-             break # Exit after remediation for a clean demo
-            else :
-             logger.info(f"Network normal. Latency: {latency}ms")
+                logger.warning(f"Congestion detected! Latency: {latency}ms > {LATENCY_THRESHOLD_MS}ms threshold")
+                enable_qos()
+                logger.info("Remediation complete. Monitor will now exit. Run reset_network.sh to return to normal.")
+                break # Exit after remediation for a clean demo
+            else:
+                logger.info(f"Network condition: {latency}ms latency (threshold: {LATENCY_THRESHOLD_MS}ms)")
+
 
             time.sleep(CHECK_INTERVAL)
     except KeyboardInterrupt:
-      logger.info("Monitor stopped by user.")
+        logger.info("Monitor stopped by user.")
 
 if __name__ == "__main__":
    main()
