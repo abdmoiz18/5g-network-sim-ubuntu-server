@@ -1,63 +1,55 @@
-# 5g-network-sim-ubuntu-server
-An Ubuntu Server VM-based simulation of a 5G network, featuring backhaul congestion as the first phase, network slicing as the second phase, and a file-based core as the third phase.
+# Phase 1: 5G Backhaul & QoS Simulation
 
-## 🚧 Project Phases
+## Objective
+Simulate and analyze network congestion on a shared backhaul link and implement a Quality of Service (QoS) policy to prioritize critical traffic.
 
-This project is built incrementally. Each phase depends on the previous one.
-
-| Phase | Name | Description | Status |
-| :--- | :--- | :--- | :--- |
-| 1 | [Backhaul & QoS Simulation](./phase-1-backhaul/) | Simulates and mitigates network congestion. | **Completed** |
-| 2 | [Network Slicing](./phase-2-slicing/) | Implements logical network isolation. | Planned |
-| 3 | [File-Based 5G Core](./phase-3-core/) | Simulates AMF, SMF, and UPF signaling. | Planned |
-
-## 🛠️ Tech Stack
-
-* **Platform:** Ubuntu Linux
-* **Virtualization:** Docker, Docker Compose
-* **Networking:** `tc` (Traffic Control), `iptables`, Linux Network Namespaces, `veth`
-* **Scripting:** Bash, Python
-* **Monitoring:** Wireshark, `ping`, `iperf3`, `iftop`
+---
 
 ## 📂 Repository Structure
 
 ```
-5g-network-sim-ubuntu-server/
-├── phase-1-backhaul/
-│   ├── scripts/
-│   │   ├── monitorinit.py
-│   │   ├── monitor_progressive.py
-│   │   ├── monitor.py
-│   ├── docs/
-│   │   ├── BackhaulOut/
-│   │   │   ├── before-vs-after-impair-network.sh.png
-│   │   │   ├── monitor-progressive-wireshark.pdf
-│   │   │   ├── monitorinit.py_output.png
-│   │   │   ├── monitor.py_output.png
-│   │   │   ├── monitor-init-wireshark.pdf
-│   │   │   ├── monitor-wireshark.pdf
-│   │   │   ├── monitor_progressive.py_output.png
-│   ├── README.md
+phase-1-backhaul/
+├── scripts/
+│   ├── monitorinit.py           # Initial congestion detection script
+│   ├── monitor_progressive.py   # Progressive congestion simulation
+│   ├── monitor.py               # Final script with jitter and rate limiting
+├── docs/
+│   ├── iperf3-before.pdf
+│   ├── iperf3-after.pdf
+│   ├── terminal-monitorinit-output.png
+│   ├── terminal-monitor-progressive-output.png
+│   ├── wireshark-monitorinit.pdf
+│   ├── wireshark-monitor-progressive.pdf
+│   ├── wireshark-monitor-final.pdf
 │   ├── PHASE-1-EXECUTION-NOTES.md
-├── LICENSE
 └── README.md
 ```
 
-## 📝 Getting Started
+---
 
-1. **Install Prerequisites**:
+## 🚀 How to Run
+
+1. **Start Traffic Generators**:
    ```bash
-   sudo apt update && sudo apt install -y docker.io python3-pip iperf3
+   docker-compose up -d
    ```
 
-2. **Navigate to the Desired Phase**:
+2. **Apply Network Impairment**:
    ```bash
-   cd phase-1-backhaul
+   sudo bash scripts/impair_network.sh
    ```
 
-3. **Follow Phase-Specific Instructions**:
-   Refer to the `README.md` in each phase folder.
+3. **Run the Monitoring Script**:
+   Choose the script based on the stage:
+   - **Basic Detection**: `python3 scripts/monitorinit.py`
+   - **Progressive Simulation**: `python3 scripts/monitor_progressive.py`
+   - **Final Simulation**: `python3 scripts/monitor.py`
 
-## 📜 License
+4. **Validate the Network**:
+   - Use `iperf3 -c <target-ip>` to measure throughput.
+   - Use `ping 8.8.8.8` to measure latency.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+---
+
+## 📊 Analysis
+For detailed execution notes and Wireshark/iperf3 results, refer to the [Execution Notes](./docs/PHASE-1-EXECUTION-NOTES.md).
