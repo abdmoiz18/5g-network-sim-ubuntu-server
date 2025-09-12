@@ -3,39 +3,53 @@
 ## Objective
 Simulate and analyze network congestion on a shared backhaul link and implement a Quality of Service (QoS) policy to prioritize critical traffic.
 
-## Theory
-In a 5G network, the backhaul connects the radio unit to the core network. Congestion here causes latency and packet loss. QoS mechanisms like priority queuing are used to ensure performance for sensitive applications like voice and video.
+---
 
-## 📁 Structure
+## 📂 Repository Structure
+
 ```
 phase-1-backhaul/
 ├── scripts/
-│   ├── impair_network.sh     # Applies 'tc' rules to create congestion
-│   ├── enable_qos.sh         # Applies 'tc' rules to implement QoS
-│   └── monitor.py            # Python script to detect congestion
+│   ├── monitorinit.py           # Initial congestion detection script
+│   ├── monitor_progressive.py   # Progressive congestion simulation
+│   ├── monitor.py               # Final script with jitter and rate limiting
 ├── docs/
-│   └── captures/             # Wireshark PCAPs and screenshots
-└── docker-compose.yml        # Defines traffic-generator containers
+│   ├── iperf3-before.pdf
+│   ├── iperf3-after.pdf
+│   ├── terminal-monitorinit-output.png
+│   ├── terminal-monitor-progressive-output.png
+│   ├── wireshark-monitorinit.pdf
+│   ├── wireshark-monitor-progressive.pdf
+│   ├── wireshark-monitor-final.pdf
+│   ├── PHASE-1-EXECUTION-NOTES.md
+└── README.md
 ```
+
+---
 
 ## 🚀 How to Run
 
-1.  **Start the traffic generators:**
-    ```bash
-    docker-compose up -d
-    ```
-2.  **Apply network impairment (simulate congestion):**
-    ```bash
-    sudo bash scripts/impair_network.sh
-    ```
-3.  **Run the monitoring script to auto-detect and remediate:**
-    ```bash
-    python3 scripts/monitor.py
-    ```
-4.  **Validate:** Use `ping 8.8.8.8` and `iperf3 -c your-vm-ip` to observe performance before, during, and after remediation.
+1. **Start Traffic Generators**:
+   ```bash
+   docker-compose up -d
+   ```
 
-## 🔍 Validation
-Successful implementation will be shown by:
-1.  A significant increase in latency and drop in throughput after running `impair_network.sh`.
-2.  The `monitor.py` script logging "Congestion detected".
-3.  Latency for ping traffic recovering after the script runs `enable_qos.sh`, while bulk throughput remains limited.
+2. **Apply Network Impairment**:
+   ```bash
+   sudo bash scripts/impair_network.sh
+   ```
+
+3. **Run the Monitoring Script**:
+   Choose the script based on the stage:
+   - **Basic Detection**: `python3 scripts/monitorinit.py`
+   - **Progressive Simulation**: `python3 scripts/monitor_progressive.py`
+   - **Final Simulation**: `python3 scripts/monitor.py`
+
+4. **Validate the Network**:
+   - Use `iperf3 -c <target-ip>` to measure throughput.
+   - Use `ping 8.8.8.8` to measure latency.
+
+---
+
+## 📊 Analysis
+For detailed execution notes and Wireshark/iperf3 results, refer to the [Execution Notes](./docs/PHASE-1-EXECUTION-NOTES.md).
